@@ -7,6 +7,7 @@
 //============================================================================
 
 #include <iostream>
+#include <cmath>
 using namespace std;
 
 class ConicShape{
@@ -23,29 +24,28 @@ public:
 
 class Circle : public ConicShape{
 private:
-	float radius;
+	int radius;
 public:
-	Circle(float radius);
+	Circle(int radius);
 	~Circle(){};
 	float area(void);
-	void resize(float newRadius);
+	void resize(int newRadius);
 	void display(void);
 	bool isPointInside(int pointX, int pointY);
 };
 
 class Ellipse : public ConicShape{
 private:
-	float xRadius;
-	float yRadius;
-	float angle;
+	int xRadius;
+	int yRadius;
+	int angle;
 public:
-	Ellipse(int xRadius, int yRadius, float angle = 0);
+	Ellipse(int xRadius, int yRadius, int angle = 0);
 	float area(void);
-	void resize(float newXRadius, float newYRadius);
+	void resize(int newXRadius, int newYRadius);
 	void display(void);
-	void rotate(float angleOffset);
-	int xVertexPosition();
-	int yVertexPosition();
+	void rotate(int angleOffset);
+	void vertexPositions(int* vPositions);
 };
 
 int main() {
@@ -63,22 +63,32 @@ int main() {
 
 	cout << "\n(10, 10) is " << (c.isPointInside(10,10) ? "" : "not ") << "inside the circle." << endl;
 	cout << "(1000, 1000) is " << (c.isPointInside(1000,1000) ? "" : "not ") << "inside the circle." << endl;
-	cout << endl << "==========ELLIPSE==========" << endl;
+	
+    
+    cout << endl << "==========ELLIPSE==========" << endl;
 	Ellipse e(10, 20);
 	e.display();
+    
+    int vPositions[4];
+    e.vertexPositions(vPositions);
+    cout << "Vertex 1: (" << vPositions[0] << ", " << vPositions[1] << ")" << endl;
+    cout << "Vertex 2: (" << vPositions[2] << ", " << vPositions[3] << ")" << endl;
 
-	e.move(25, 6);
+	e.move(10, 6);
 	e.display();
 
 	cout << "Ellipse area: " << e.area() << endl;
 
-	e.resize(9, 4.5);
+	e.resize(5, 4);
 	e.display();
+    
+    e.rotate(45);
+    e.display();
 
 	return 0;
 }
 
-Circle::Circle(float newRadius) : ConicShape(){
+Circle::Circle(int newRadius) : ConicShape(){
 	radius = newRadius;
 }
 
@@ -90,8 +100,8 @@ float Circle::area(){
 	return radius * radius * 3.14;
 }
 
-void Circle::resize(float scale){
-	radius *= scale;
+void Circle::resize(int newRadius){
+	radius = newRadius;
 }
 
 void Circle::display(){
@@ -109,7 +119,7 @@ bool Circle::isPointInside(int xValue, int yValue){
 	}
 }
 
-Ellipse::Ellipse(int newXRadius, int newYRadius, float newAngle) : ConicShape(){
+Ellipse::Ellipse(int newXRadius, int newYRadius, int newAngle) : ConicShape(){
 	xRadius = newXRadius;
 	yRadius = newYRadius;
 	angle = newAngle;
@@ -119,7 +129,7 @@ float Ellipse::area(){
 	return xRadius * yRadius * 3.14;
 }
 
-void Ellipse::resize(float newXRadius, float newYRadius){
+void Ellipse::resize(int newXRadius, int newYRadius){
 	xRadius = newXRadius;
 	yRadius = newYRadius;
 }
@@ -130,13 +140,21 @@ void Ellipse::display(){
 	cout << "\tY Position: " << y << endl;
 	cout << "\tHorizontal Radius: " << xRadius << endl;
 	cout << "\tVertical Radius: " << yRadius << endl;
+    cout << "\tAngle: " << angle << endl;
 }
 
-void Ellipse::rotate(float angleOffset){
+void Ellipse::rotate(int angleOffset){
 	angle += angleOffset;
 	if(angle >= 360){
 		angle -= 360;
 	}
+}
+
+void Ellipse::vertexPositions(int* vPositions){
+    *(vPositions++) = int((angle <= 90 || angle >= 270) ? x - (cos((2 * 3.14) * angle) * xRadius) : x + (cos((2 * 3.14) * angle) * xRadius));
+    *(vPositions++) = int((angle <= 180) ? y - (sin((2 * 3.14) * angle) * yRadius) : y + (cos((2 * 3.14) * angle) * yRadius));
+    *(vPositions++) = int((angle <= 90 || angle >= 270) ? x + (cos((2 * 3.14) * angle) * xRadius) : x - (cos((2 * 3.14) * angle) * xRadius));
+    *(vPositions) = int((angle <= 180) ? y - (sin((2 * 3.14) * angle) * yRadius) : y + (cos((2 * 3.14) * angle) * yRadius));
 }
 
 
